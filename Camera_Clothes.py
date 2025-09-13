@@ -2,18 +2,11 @@ import streamlit as st
 from openai import OpenAI
 from PIL import Image
 import io
-import base64
-
-# ---------- Helper to convert PIL Image to base64 ----------
-def image_to_base64(img: Image.Image) -> str:
-    buffered = io.BytesIO()
-    img.save(buffered, format="PNG")
-    return base64.b64encode(buffered.getvalue()).decode("utf-8")
 
 # ---------- Streamlit App ----------
 st.set_page_config(page_title="Clothing Describer", page_icon="👗", layout="centered")
 
-client = OpenAI(api_key=st.secrets["OPENAI_API_KEY"])  # API key from secrets.toml or Streamlit Cloud Secrets Manager
+client = OpenAI(api_key=st.secrets["OPENAI_API_KEY"])  # key in secrets.toml or Streamlit Cloud Secrets Manager
 
 st.title("👗 Clothing Description Generator")
 st.write("Take or upload a picture of clothing, and I'll generate a description for you.")
@@ -29,42 +22,47 @@ if image_source:
     image = Image.open(image_source)
     st.image(image, caption="Uploaded Image", use_column_width=True)
 
+    # Convert to bytes for OpenAI API
+    img_bytes = io.BytesIO()
+    image.save(img_bytes, format="PNG")
+    img_bytes = img_bytes.getvalue()
+
     with st.spinner("Analyzing clothing..."):
-        # Send to OpenAI Vision
-        response = client.chat.completions.create(
-            model="gpt-4o-mini",   # fast multimodal model
-            messages=[
-                {
-                    "role": "system",
-                    "content": (
-                        "You are a fashion assistant. "
-                        "Always give short, clear product-style descriptions: color, type of clothing, "
-                        "material/style if visible."
-                    )
-                },
-                {
-                    "role": "user",
-                    "content": [
-                        {
-                            "type": "text",
-                            "text": "Describe this clothing item in one or two sentences."
-                        },
-                        {
-                            "type": "image_url",
-                            "image_url": {
-                                "url": "data:image/png;base64," + image_to_base64(image)
-                            }
-                        }
-                    ]
-                }
-            ],
-            max_tokens=150
-        )
+        try:
+            response = client.chat.completions.create(
+                model="gpt-4o-mini",   # fast multimodal model
+                messages=[
+                    {
+                        "role": "system",
+                        "content": (
+                            "You are a fashion assistant. "
+                            "Always give short, clear product-style descriptions: color, type of clothing, "
+                            "material/style if visible."
+                        )
+                    },
+                    {
+                        "role": "user",
+                        "content": "Describe this clothing item in one or two sentences."
+                    }
+                ],
+                files=[
+                    {
+                        "name": "clothing.png",
+                        "buffer": io.BytesIO(img_bytes)
+                    }
+                ],
+                max_tokens=150
+            )
 
-        description = response.choices[0].message["content"]
+            description = response.choices[0].message["content"]
 
-    st.success("### Clothing Description")
-    st.write(description)
+        except Exception as e:
+            st.error(f"Error: {e}")
+            description = None
 
-    # Easy copy box
-    st.text_area("Copy description:", description, height=100)
+    if description:
+        st.success("### Clothing Description")
+        st.write(description)
+
+        # Easy copy box
+        st.text_area("Copy description:", description, height=100)
