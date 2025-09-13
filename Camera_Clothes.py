@@ -34,32 +34,17 @@ if image_source:
             response = client.chat.completions.create(
                 model="gpt-4o-mini",
                 messages=[
-                    {
-                        "role": "system",
-                        "content": (
-                            "You are a fashion assistant. "
-                            "Always give short, clear product-style descriptions: color, type of clothing, "
-                            "material/style if visible."
-                        )
-                    },
-                    {
-                        "role": "user",
-                        "content": [
-                            {"type": "text", "text": "Describe this clothing item in one or two sentences."},
-                            {
-                                "type": "image_url",
-                                "image_url": {
-                                    "url": "data:image/png;base64," + image_to_base64(image)
-                                }
-                            }
-                        ]
-                    }
+                    {"role": "system", "content": "You are a fashion assistant. Always give short, clear product-style descriptions."},
+                    {"role": "user", "content": [
+                        {"type": "text", "text": "Describe this clothing item in one or two sentences."},
+                        {"type": "image_url", "image_url": {"url": "data:image/png;base64," + image_to_base64(image)}}
+                    ]}
                 ],
                 max_tokens=150
             )
-
-            description = response.choices[0].message["content"]
-
+    
+            description = response.choices[0].message.content  # ✅ Correct way
+    
         except Exception as e:
             st.error(f"Error: {e}")
             description = None
