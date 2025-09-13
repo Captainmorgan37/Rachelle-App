@@ -27,7 +27,7 @@ image_source = camera_file or uploaded_file
 if image_source:
     # Open and show the image
     image = Image.open(image_source)
-    st.image(image, caption="Uploaded Image", use_column_width=True)
+    st.image(image, caption="Uploaded Image", use_container_width=True)
 
     with st.spinner("Analyzing clothing..."):
         try:
