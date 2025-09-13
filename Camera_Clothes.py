@@ -50,7 +50,7 @@ if mode == "📷 Take a Photo":
                     ],
                     max_tokens=150
                 )
-                description = response.choices[0].message["content"]
+                description = response.choices[0].message.content
             except Exception as e:
                 description = f"Error: {e}"
 
