@@ -45,8 +45,16 @@ if image_source:
                 {
                     "role": "user",
                     "content": [
-                        {"type": "text", "text": "Describe this clothing item in one or two sentences."},
-                        {"type": "image_url", "image_url": {"url": "data:image/png;base64," + image_to_base64(image)}}
+                        {
+                            "type": "text",
+                            "text": "Describe this clothing item in one or two sentences."
+                        },
+                        {
+                            "type": "image_url",
+                            "image_url": {
+                                "url": "data:image/png;base64," + image_to_base64(image)
+                            }
+                        }
                     ]
                 }
             ],
