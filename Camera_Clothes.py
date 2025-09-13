@@ -50,7 +50,7 @@ if mode == "📷 Take a Photo":
                     ],
                     max_tokens=150
                 )
-                description = response.choices[0].message.content
+                description = response.choices[0].message.content  # ✅ FIXED
             except Exception as e:
                 description = f"Error: {e}"
 
@@ -89,7 +89,7 @@ elif mode == "📂 Upload Existing Photos":
                         ],
                         max_tokens=150
                     )
-                    description = response.choices[0].message["content"]
+                    description = response.choices[0].message.content  # ✅ FIXED
                 except Exception as e:
                     description = f"Error: {e}"
 
